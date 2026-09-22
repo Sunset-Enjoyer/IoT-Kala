@@ -92,7 +92,7 @@ function connectMQTT() {
 
 // --- 2. CEK STATUS DATABASE MYSQL (Dari index2.html) ---
 function cekDatabase() {
-  fetch('assets/api/api_status_db.php')
+  fetch(assets/api/api_status_db.php)
     .then((response) => response.json())
     .then((data) => {
       if (data.status === "online") {
@@ -117,7 +117,7 @@ function cekDatabase() {
 
 // --- 3. AMBIL DATA TERAKHIR DARI DATABASE (Dari index2.html) ---
 function loadSavedData() {
-  fetch('assets/api/api_baca.php')
+  fetch(assets/api/api_baca.php)
     .then((response) => response.json())
     .then((data) => {
       if (data) {
@@ -195,7 +195,7 @@ function kirimData() {
   formData.append("speed", payloadObj.speed);
   formData.append("mode", payloadObj.mode);
 
-  fetch('assets/api/api_simpan.php', {
+  fetch(assets/api/api_simpan.php, {
     method: "POST",
     body: formData,
   }).catch(() => {
