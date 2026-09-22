@@ -1,10 +1,11 @@
 ﻿// ====================================================================
-// KALA.CLOCK — IOT CONTROLLER JAVASCRIPT
+// KALA.CLOCK — FULLY RESPONSIVE IOT CONTROLLER JAVASCRIPT
 // Menggabungkan fungsi-fungsi dari index2.html:
 // - Koneksi MQTT Real-Time (Paho MQTT via WebSockets SSL)
 // - Cek Status & Baca/Simpan Database MySQL
 // - Simulasi Layar Virtual LED P10 Real-Time
 // - Sinkronisasi Jam Digital RTC/NTP
+// - Penanganan Navigasi Responsif Mobile, Tablet, & Desktop
 // ====================================================================
 
 // --- 1. KONFIGURASI MQTT (Dari index2.html) ---
@@ -151,9 +152,11 @@ function kirimData() {
   // Buat objek Payload
   let payloadObj = {
     teks: teksVal,
-    brightness: brightnessVal,
+    brightness: isPowerOn ? brightnessVal : 0,
+    power: isPowerOn ? 1 : 0,
     speed: speedVal,
     mode: modeVal,
+    timezone: timezoneOffset,
     timestamp: Date.now(),
   };
 
@@ -208,10 +211,13 @@ function sinkronWaktu() {
   const menit = String(now.getMinutes()).padStart(2, "0");
   const detik = String(now.getSeconds()).padStart(2, "0");
   const timeStr = `${jam}:${menit}:${detik}`;
+  const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
   const payloadSync = {
     action: "sync_time",
     time: timeStr,
+    date: dateStr,
+    timezone: timezoneOffset,
     timestamp: now.getTime(),
   };
 
@@ -224,7 +230,8 @@ function sinkronWaktu() {
 
   const pesanEl = document.getElementById("pesan");
   if (pesanEl) {
-    pesanEl.innerHTML = `⏰ Waktu Kala.Clock berhasil disinkronkan ke <strong>${timeStr}</strong>!`;
+    const tzSign = timezoneOffset >= 0 ? "+" : "";
+    pesanEl.innerHTML = `⏰ Waktu Kala.Clock berhasil disinkronkan ke <strong>${timeStr}</strong> (UTC${tzSign}${timezoneOffset})!`;
     setTimeout(() => {
       pesanEl.innerHTML = "";
     }, 3500);
@@ -235,12 +242,81 @@ function sinkronWaktu() {
 let show24h = true;
 let showDetik = true;
 let showTanggal = true;
+let isPowerOn = true;
+let timezoneOffset = 8; // Default WITA (UTC+8)
+
+// SAKLAR DAYA PANEL LED
+function togglePowerSwitch() {
+  isPowerOn = !isPowerOn;
+  setPowerState(isPowerOn, true);
+}
+
+function setPowerState(state, sendMqtt = true) {
+  isPowerOn = state;
+  const switchBtn = document.getElementById("powerSlideSwitch");
+  const badge = document.getElementById("powerStateBadge");
+  const slider = document.getElementById("inputBrightness");
+
+  if (isPowerOn) {
+    if (switchBtn) {
+      switchBtn.classList.add("active");
+      switchBtn.setAttribute("aria-checked", "true");
+    }
+    if (badge) {
+      badge.textContent = "AKTIF (ON)";
+      badge.classList.remove("off");
+    }
+    // Default brightness 100 saat dinyalakan
+    const targetVal = 150;
+    if (slider) slider.value = targetVal;
+    updateBrightnessFromSlider(targetVal, false);
+
+    if (sendMqtt) {
+      kirimPowerMqtt(targetVal, 1);
+    }
+  } else {
+    if (switchBtn) {
+      switchBtn.classList.remove("active");
+      switchBtn.setAttribute("aria-checked", "false");
+    }
+    if (badge) {
+      badge.textContent = "MATI (OFF)";
+      badge.classList.add("off");
+    }
+    // Langsung matikan brightness ke 0
+    if (slider) slider.value = 0;
+    updateBrightnessFromSlider(0, false);
+
+    if (sendMqtt) {
+      kirimPowerMqtt(0, 0);
+    }
+  }
+}
+
+function kirimPowerMqtt(brightnessVal, powerVal) {
+  const payloadPower = {
+    action: "set_power",
+    brightness: brightnessVal,
+    power: powerVal,
+    timestamp: Date.now(),
+  };
+  if (mqttClient && mqttClient.isConnected()) {
+    let msg = new Paho.MQTT.Message(JSON.stringify(payloadPower));
+    msg.destinationName = mqtt_topic;
+    msg.retained = true;
+    mqttClient.send(msg);
+  }
+}
 
 function updateClock() {
   const now = new Date();
-  let hours = now.getHours();
-  const minutes = String(now.getMinutes()).padStart(2, "0");
-  const seconds = String(now.getSeconds()).padStart(2, "0");
+  // Kalkulasi waktu berdasarkan zona waktu pilihan (UTC + timezoneOffset)
+  const utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
+  const targetTime = new Date(utcMs + (3600000 * timezoneOffset));
+
+  let hours = targetTime.getHours();
+  const minutes = String(targetTime.getMinutes()).padStart(2, "0");
+  const seconds = String(targetTime.getSeconds()).padStart(2, "0");
 
   let ampm = "";
   if (!show24h) {
@@ -275,7 +351,7 @@ function updateClock() {
     "Nov",
     "Des",
   ];
-  const dateStr = `${days[now.getDay()]}, ${String(now.getDate()).padStart(2, "0")} ${months[now.getMonth()]} ${now.getFullYear()}`;
+  const dateStr = `${days[targetTime.getDay()]}, ${String(targetTime.getDate()).padStart(2, "0")} ${months[targetTime.getMonth()]} ${targetTime.getFullYear()}`;
 
   const datePreviewEl = document.getElementById("virtualDate");
   if (datePreviewEl) {
@@ -285,7 +361,7 @@ function updateClock() {
 }
 
 // Update Kecerahan di Slider & Preview
-function updateBrightnessFromSlider(val) {
+function updateBrightnessFromSlider(val, syncSwitch = true) {
   const num = parseInt(val) || 0;
   const badge = document.getElementById("badgeBrightness");
   const previewText = document.getElementById("previewBrightnessText");
@@ -300,6 +376,33 @@ function updateBrightnessFromSlider(val) {
     const darkness = 0.85 - (num / 255) * 0.75;
     dimmer.style.backgroundColor = `rgba(0, 0, 0, ${darkness})`;
   }
+
+  // Sinkronkan status saklar daya saat slider digeser
+  if (syncSwitch) {
+    const switchBtn = document.getElementById("powerSlideSwitch");
+    const powerBadge = document.getElementById("powerStateBadge");
+    if (num === 0) {
+      isPowerOn = false;
+      if (switchBtn) {
+        switchBtn.classList.remove("active");
+        switchBtn.setAttribute("aria-checked", "false");
+      }
+      if (powerBadge) {
+        powerBadge.textContent = "MATI (OFF)";
+        powerBadge.classList.add("off");
+      }
+    } else {
+      isPowerOn = true;
+      if (switchBtn) {
+        switchBtn.classList.add("active");
+        switchBtn.setAttribute("aria-checked", "true");
+      }
+      if (powerBadge) {
+        powerBadge.textContent = "AKTIF (ON)";
+        powerBadge.classList.remove("off");
+      }
+    }
+  }
 }
 
 // Preset Kecerahan Cepat
@@ -307,12 +410,126 @@ function setBrightnessPreset(val) {
   const slider = document.getElementById("inputBrightness");
   if (slider) {
     slider.value = val;
-    updateBrightnessFromSlider(val);
+    updateBrightnessFromSlider(val, true);
   }
+  terapkanKecerahanLangsung();
 }
 
 function terapkanKecerahanLangsung() {
-  kirimData();
+  const slider = document.getElementById("inputBrightness");
+  const brightnessVal = slider ? parseInt(slider.value) : 100;
+  kirimPowerMqtt(isPowerOn ? brightnessVal : 0, isPowerOn ? 1 : 0);
+
+  const pesanEl = document.getElementById("pesan");
+  if (pesanEl) {
+    pesanEl.innerHTML = `☀️ Kecerahan layar diatur ke <strong>${brightnessVal}</strong> (${isPowerOn ? "Layar Aktif" : "Layar Mati"})!`;
+    setTimeout(() => {
+      pesanEl.innerHTML = "";
+    }, 3500);
+  }
+}
+
+// --- PENGATURAN ZONA WAKTU & RTC MANUAL (CARD 3) ---
+function updateTimezoneFromInput(val) {
+  let num = parseInt(val);
+  if (isNaN(num)) num = 0;
+  if (num < -12) num = -12;
+  if (num > 12) num = 12;
+  timezoneOffset = num;
+
+  const tzInput = document.getElementById("inputTimezone");
+  if (tzInput && tzInput.value !== String(num)) {
+    tzInput.value = num;
+  }
+
+  const tzBadge = document.getElementById("badgeTimezone");
+  const tzPrefix = num >= 0 ? `+${num}` : `${num}`;
+  if (tzBadge) tzBadge.textContent = `UTC${tzPrefix}`;
+
+  const cardTzLabel = document.getElementById("liveTimezoneLabel");
+  let tzName = `UTC${tzPrefix}`;
+  if (num === 7) tzName = "WIB (UTC+7)";
+  else if (num === 8) tzName = "WITA (UTC+8)";
+  else if (num === 9) tzName = "WIT (UTC+9)";
+  if (cardTzLabel) cardTzLabel.textContent = tzName;
+
+  document.querySelectorAll(".btn-tz-pill").forEach((pill) => {
+    if (
+      pill.getAttribute("onclick") &&
+      pill.getAttribute("onclick").includes(`(${num})`)
+    ) {
+      pill.classList.add("active");
+    } else {
+      pill.classList.remove("active");
+    }
+  });
+
+  updateClock();
+}
+
+function setTimezonePreset(val) {
+  const tzInput = document.getElementById("inputTimezone");
+  if (tzInput) tzInput.value = val;
+  updateTimezoneFromInput(val);
+}
+
+function initManualTimeInputs() {
+  const now = new Date();
+  const timeInput = document.getElementById("inputManualTime");
+  const dateInput = document.getElementById("inputManualDate");
+  if (timeInput && !timeInput.value) {
+    timeInput.value = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
+  }
+  if (dateInput && !dateInput.value) {
+    dateInput.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  }
+}
+
+function terapkanWaktuManual() {
+  const timeInput = document.getElementById("inputManualTime");
+  const dateInput = document.getElementById("inputManualDate");
+  const pesanEl = document.getElementById("pesan");
+
+  let timeVal = timeInput ? timeInput.value : "";
+  let dateVal = dateInput ? dateInput.value : "";
+
+  const now = new Date();
+  if (!timeVal) {
+    timeVal = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
+  } else if (timeVal.length === 5) {
+    timeVal += ":00";
+  }
+
+  if (!dateVal) {
+    dateVal = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  }
+
+  const payloadTime = {
+    action: "set_time",
+    time: timeVal,
+    date: dateVal,
+    timezone: timezoneOffset,
+    timestamp: Date.now(),
+  };
+
+  let sent = false;
+  if (mqttClient && mqttClient.isConnected()) {
+    let msg = new Paho.MQTT.Message(JSON.stringify(payloadTime));
+    msg.destinationName = mqtt_topic;
+    msg.retained = false;
+    mqttClient.send(msg);
+    sent = true;
+  }
+
+  if (pesanEl) {
+    const tzSign = timezoneOffset >= 0 ? "+" : "";
+    pesanEl.innerHTML = sent
+      ? `⏰ Jam & Tanggal manual (${timeVal}, ${dateVal}, UTC${tzSign}${timezoneOffset}) berhasil dikirim ke RTC modul!`
+      : `⏰ Jam manual (${timeVal}) diterapkan di simulasi (Broker MQTT offline).`;
+    setTimeout(() => {
+      pesanEl.innerHTML = "";
+    }, 3500);
+  }
 }
 
 // Update Kecepatan Scroll
@@ -325,7 +542,7 @@ function updateSpeedFromSlider(val) {
   if (badge) badge.textContent = `${num} ms`;
   if (previewText) previewText.textContent = `${num} ms`;
 
-  // Atur durasi animasi marquee berdasarkan kecepatan (semakin tinggi nilai, semakin cepat)
+  // Atur durasi animasi marquee berdasarkan kecepatan
   if (ticker) {
     const duration = Math.max(4, Math.round(25 - (num / 100) * 19));
     ticker.style.animationDuration = `${duration}s`;
@@ -424,26 +641,155 @@ function updateStatusBadge(id, status, text) {
 }
 
 function updateSidebarStatus(isOnline) {
-  const dot = document.getElementById("sidebarDot");
-  const text = document.getElementById("sidebarStatusText");
-  if (dot && text) {
-    if (isOnline) {
-      dot.style.backgroundColor = "var(--color-online)";
-      dot.style.boxShadow = "0 0 6px var(--color-online)";
-      text.textContent = "Sistem Online";
-    } else {
-      dot.style.backgroundColor = "var(--color-offline)";
-      dot.style.boxShadow = "0 0 6px var(--color-offline)";
-      text.textContent = "Sistem Offline";
+  const desktopDot = document.getElementById("sidebarDot");
+  const desktopText = document.getElementById("sidebarStatusText");
+  const mobileDot = document.getElementById("mobileSidebarDot");
+  const mobileText = document.getElementById("mobileStatusText");
+
+  const statusClass = isOnline ? "var(--color-online)" : "var(--color-offline)";
+  const statusLabel = isOnline ? "Online" : "Offline";
+
+  if (desktopDot) {
+    desktopDot.style.backgroundColor = statusClass;
+    desktopDot.style.boxShadow = "0 0 6px " + statusClass;
+  }
+  if (desktopText) {
+    desktopText.textContent = isOnline ? "Sistem Online" : "Sistem Offline";
+  }
+
+  if (mobileDot) {
+    mobileDot.style.backgroundColor = statusClass;
+    mobileDot.style.boxShadow = "0 0 6px " + statusClass;
+  }
+  if (mobileText) {
+    mobileText.textContent = statusLabel;
+  }
+}
+
+// --- 7. RESPONSIVE MOBILE DRAWER & NAVIGATION HANDLERS ---
+function setupResponsiveNav() {
+  const menuBtn = document.getElementById("mobileMenuBtn");
+  const closeBtn = document.getElementById("sidebarCloseBtn");
+  const backdrop = document.getElementById("sidebarBackdrop");
+  const navLinks = document.querySelectorAll(".nav-link");
+
+  function openDrawer() {
+    document.body.classList.add("sidebar-open");
+    if (menuBtn) menuBtn.setAttribute("aria-expanded", "true");
+  }
+
+  function closeDrawer() {
+    document.body.classList.remove("sidebar-open");
+    if (menuBtn) menuBtn.setAttribute("aria-expanded", "false");
+  }
+
+  if (menuBtn) {
+    menuBtn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      if (document.body.classList.contains("sidebar-open")) {
+        closeDrawer();
+      } else {
+        openDrawer();
+      }
+    });
+  }
+
+  if (closeBtn) {
+    closeBtn.addEventListener("click", function () {
+      closeDrawer();
+    });
+  }
+
+  if (backdrop) {
+    backdrop.addEventListener("click", function () {
+      closeDrawer();
+    });
+  }
+
+  // Tutup drawer otomatis saat link navigasi diklik
+  navLinks.forEach((link) => {
+    link.addEventListener("click", function () {
+      closeDrawer();
+
+      // Update active state di nav
+      if (this.classList.contains("nav-link")) {
+        document
+          .querySelectorAll(".nav-link")
+          .forEach((l) => l.classList.remove("active"));
+        this.classList.add("active");
+      }
+    });
+  });
+
+  // Tutup drawer jika layar di-resize kembali ke desktop (> 768px)
+  window.addEventListener("resize", function () {
+    if (
+      window.innerWidth > 768 &&
+      document.body.classList.contains("sidebar-open")
+    ) {
+      closeDrawer();
+    }
+  });
+}
+
+// --- 8. SCROLLSPY OTOMATIS UNTUK HIGHLIGHT SIDEBAR ---
+function setupScrollSpy() {
+  const sections = [
+    document.getElementById("preview-section"),
+    document.getElementById("dashboard"),
+    document.getElementById("panduan"),
+  ].filter(Boolean);
+
+  const navLinks = document.querySelectorAll(".sidebar nav .nav-link");
+
+  function onScroll() {
+    const scrollPosition = window.scrollY + 180;
+
+    let currentSectionId = "";
+    sections.forEach((section) => {
+      const top = section.offsetTop;
+      const height = section.offsetHeight;
+      if (scrollPosition >= top && scrollPosition < top + height) {
+        currentSectionId = section.getAttribute("id");
+      }
+    });
+
+    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 60) {
+      if (sections.length > 0) {
+        currentSectionId = sections[sections.length - 1].getAttribute("id");
+      }
+    }
+
+    if (currentSectionId) {
+      navLinks.forEach((link) => {
+        const target =
+          link.getAttribute("data-section") ||
+          link.getAttribute("href").replace("#", "");
+        if (target === currentSectionId) {
+          link.classList.add("active");
+        } else {
+          link.classList.remove("active");
+        }
+      });
     }
   }
+
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
 }
 
 // --- INISIALISASI SAAT HALAMAN DIMUAT ---
 document.addEventListener("DOMContentLoaded", function () {
+  // Inisialisasi input manual waktu & tanggal
+  initManualTimeInputs();
+
   // Jalankan jam digital
   updateClock();
   setInterval(updateClock, 1000);
+
+  // Setup navigasi responsif & Scrollspy
+  setupResponsiveNav();
+  setupScrollSpy();
 
   // Jalankan koneksi MQTT & Database
   connectMQTT();
@@ -452,13 +798,4 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Muat data terakhir
   loadSavedData();
-
-  // Highlight navigation on scroll
-  const navLinks = document.querySelectorAll(".nav-link");
-  navLinks.forEach((link) => {
-    link.addEventListener("click", function () {
-      navLinks.forEach((l) => l.classList.remove("active"));
-      this.classList.add("active");
-    });
-  });
 });

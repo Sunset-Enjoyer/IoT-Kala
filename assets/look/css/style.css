@@ -1,6 +1,7 @@
 ﻿/* ==========================================================================
-   KALA.CLOCK — IoT CLOCK & RUNNING TEXT DASHBOARD STYLESHEET
-   Based on low.css, with custom palette and typography specifications:
+   KALA.CLOCK — FULLY RESPONSIVE IoT CLOCK & RUNNING TEXT DASHBOARD
+   Auto-adjusts across Mobile, Tablet, and Desktop interfaces.
+   Design Tokens:
    - Base Color: #fdfdfd (White)
    - Secondary Color: #2c2c2c (Charcoal Black)
    - Accent Color: #edeae0 (Warm Ecru)
@@ -13,22 +14,30 @@
   --color-base: #fdfdfd;
   --color-secondary: #2c2c2c;
   --color-secondary-light: #3d3d3d;
-  --color-secondary-dark: #1f1f1f;
+  --color-secondary-dark: #1a1a1a;
   --color-accent: #edeae0;
   --color-accent-dark: #ded9cb;
+  --color-accent-soft: #f7f6f2;
   --color-text-main: #2c2c2c;
   --color-text-muted: #5f5f5f;
   --color-border: #edeae0;
   --color-card-bg: #fdfdfd;
   --color-online: #1e8449;
   --color-offline: #c0392b;
-  --color-led-glow: #ff9f43;
+  --color-led-amber: #ffaa33;
+  --color-led-red: #ff3b30;
+
   --shadow-sm: 0 2px 8px rgba(44, 44, 44, 0.06);
   --shadow-md: 0 4px 16px rgba(44, 44, 44, 0.09);
-  --shadow-lg: 0 8px 24px rgba(44, 44, 44, 0.12);
+  --shadow-lg: 0 8px 24px rgba(44, 44, 44, 0.14);
+
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
+
+  --sidebar-width-desktop: 260px;
+  --sidebar-width-tablet: 220px;
+  --mobile-navbar-height: 64px;
 }
 
 * {
@@ -39,6 +48,7 @@
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -54,6 +64,7 @@ body {
   color: var(--color-text-main);
   line-height: 1.5;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 /* --- TYPOGRAPHY --- */
@@ -89,6 +100,21 @@ caption,
 }
 
 /* ==========================================================================
+   MOBILE TOP BAR (Desktop/Tablet: HIDDEN, Mobile: STICKY HEADER)
+   ========================================================================== */
+.mobile-navbar {
+  display: none !important; /* Tersembunyi penuh di Desktop & Tablet */
+}
+
+.sidebar-backdrop {
+  display: none !important; /* Tersembunyi penuh di Desktop & Tablet */
+}
+
+.sidebar-close-btn {
+  display: none !important; /* Tersembunyi penuh di Desktop & Tablet */
+}
+
+/* ==========================================================================
    CONTAINER 1 (SIDEBAR + MAIN)
    ========================================================================== */
 .container1 {
@@ -96,26 +122,30 @@ caption,
   display: flex;
   width: 100%;
   background-color: var(--color-base);
+  position: relative;
 }
 
 /* ==========================================================================
-   SIDEBAR
-   - Centered Logo.png with top-center alignment & 40px top padding
+   SIDEBAR (DESKTOP & TABLET DEFAULT)
+   Strict Requirement: Logo in middle of sidebar, top center alignment, 40px top padding
    ========================================================================== */
 .sidebar {
-  width: 250px;
+  width: var(--sidebar-width-desktop);
   min-height: 100vh;
-  padding: 40px 20px 24px 20px; /* 40px padding from top strictly applied */
+  padding: 40px 20px 24px 20px; /* 40px padding from top strictly maintained */
   background-color: var(--color-secondary);
   color: var(--color-base);
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  align-items: center; /* Alignment top center / middle of sidebar */
+  align-items: center; /* Top-center alignment / middle of sidebar horizontally */
   border-right: 1px solid var(--color-secondary-light);
-  box-shadow: 3px 0 15px rgba(0, 0, 0, 0.1);
-  position: relative;
-  z-index: 10;
+  box-shadow: 3px 0 15px rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 100;
 }
 
 /* LOGO WRAPPER */
@@ -138,18 +168,18 @@ caption,
 }
 
 .sidebar-logo:hover {
-  transform: scale(1.04);
+  transform: scale(1.03);
 }
 
 .sidebar-brand-title {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 28px;
 }
 
 .sidebar-brand-title h2 {
   color: var(--color-base);
   font-size: 1.35rem;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   margin-bottom: 4px;
 }
 
@@ -200,7 +230,8 @@ caption,
 }
 
 .nav-icon {
-  font-size: 1.1rem;
+  font-size: 1.15rem;
+  flex-shrink: 0;
 }
 
 /* SIDEBAR FOOTER */
@@ -209,6 +240,7 @@ caption,
   padding-top: 20px;
   border-top: 1px solid var(--color-secondary-light);
   text-align: center;
+  margin-top: auto;
 }
 
 .system-status-indicator {
@@ -228,6 +260,7 @@ caption,
   background-color: var(--color-online);
   box-shadow: 0 0 6px var(--color-online);
   animation: pulseDot 2s infinite;
+  flex-shrink: 0;
 }
 
 @keyframes pulseDot {
@@ -248,22 +281,23 @@ caption,
 }
 
 /* ==========================================================================
-   MAIN CONTENT AREA
+   MAIN CONTENT AREA (DESKTOP & TABLET & MOBILE)
    ========================================================================== */
 .main {
   flex: 1;
-  padding: 35px 40px;
+  padding: 36px 44px;
   min-width: 0;
   display: flex;
   flex-direction: column;
   background-color: var(--color-base);
+  max-width: 100%;
 }
 
 /* ==========================================================================
    HEADER
    ========================================================================== */
 .header {
-  margin-bottom: 30px;
+  margin-bottom: 28px;
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
@@ -273,21 +307,27 @@ caption,
   padding-bottom: 20px;
 }
 
+.header-text {
+  flex: 1 1 320px;
+}
+
 .header h1 {
-  font-size: 1.95rem;
+  font-size: clamp(1.6rem, 2.5vw, 2.1rem);
   margin-bottom: 6px;
   color: var(--color-secondary);
+  line-height: 1.2;
 }
 
 .header p {
   color: var(--color-text-muted);
-  font-size: 0.95rem;
+  font-size: clamp(0.85rem, 1.2vw, 0.95rem);
 }
 
 .header-actions {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .btn-sync-time,
@@ -297,12 +337,15 @@ caption,
   border: 1px solid var(--color-secondary);
   background-color: var(--color-secondary);
   color: var(--color-base);
-  font-size: 0.86rem;
+  font-size: 0.88rem;
   cursor: pointer;
   transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
+  white-space: nowrap;
+  min-height: 42px;
 }
 
 .btn-sync-time {
@@ -322,15 +365,16 @@ caption,
 }
 
 /* ==========================================================================
-   VIRTUAL LED MATRIX CLOCK PREVIEW (FEATURED)
+   VIRTUAL LED MATRIX CLOCK PREVIEW (RESPONSIVE)
    ========================================================================== */
 .preview-panel {
   background-color: var(--color-card-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 22px;
-  margin-bottom: 30px;
+  padding: clamp(16px, 2.5vw, 24px);
+  margin-bottom: 28px;
   box-shadow: var(--shadow-md);
+  width: 100%;
 }
 
 .preview-header {
@@ -349,7 +393,7 @@ caption,
 }
 
 .preview-title-box h3 {
-  font-size: 1.15rem;
+  font-size: clamp(1rem, 1.4vw, 1.2rem);
   color: var(--color-secondary);
 }
 
@@ -360,13 +404,23 @@ caption,
   background-color: var(--color-online);
   display: inline-block;
   box-shadow: 0 0 8px var(--color-online);
+  flex-shrink: 0;
 }
 
 .preview-meta {
   display: flex;
-  gap: 12px;
+  align-items: center;
+  gap: 10px;
   font-size: 0.8rem;
   color: var(--color-text-muted);
+  flex-wrap: wrap;
+}
+
+.preview-mode-tag {
+  background-color: var(--color-accent-soft);
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--color-border);
 }
 
 .preview-res {
@@ -374,28 +428,33 @@ caption,
   color: var(--color-secondary);
   padding: 2px 8px;
   border-radius: 4px;
+  font-size: 0.75rem;
 }
 
 /* LED DISPLAY FRAME & MATRIX SIMULATION */
 .led-screen-outer {
   background-color: #121212;
   border-radius: var(--radius-md);
-  padding: 14px;
+  padding: clamp(8px, 1.5vw, 14px);
   border: 4px solid var(--color-secondary);
   box-shadow:
-    inset 0 0 15px rgba(0, 0, 0, 0.8),
-    0 4px 12px rgba(0, 0, 0, 0.15);
+    inset 0 0 18px rgba(0, 0, 0, 0.85),
+    0 4px 14px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  overflow: hidden;
 }
 
 .led-screen-bezel {
   position: relative;
-  background-color: #0a0a0a;
+  background-color: #080808;
   border: 2px solid #222;
   border-radius: 8px;
   overflow: hidden;
-  min-height: 140px;
+  min-height: 130px;
   display: flex;
   align-items: center;
+  justify-content: center;
+  width: 100%;
 }
 
 /* Simulated Dot Matrix Grid Pattern */
@@ -408,7 +467,7 @@ caption,
   background-image: radial-gradient(#000000 30%, transparent 35%);
   background-size: 4px 4px;
   pointer-events: none;
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: rgba(0, 0, 0, 0.25);
   transition: background-color 0.2s ease;
   z-index: 2;
 }
@@ -419,42 +478,45 @@ caption,
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 16px 20px;
+  padding: clamp(12px, 2vw, 18px) clamp(10px, 2vw, 20px);
   z-index: 1;
   position: relative;
 }
 
 .led-clock-box {
   text-align: center;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
+  width: 100%;
 }
 
 .led-time {
   font-family: "Courier New", Courier, monospace;
-  font-size: 2.7rem;
+  font-size: clamp(1.8rem, 5vw, 2.7rem);
   font-weight: 900;
-  letter-spacing: 0.12em;
-  color: #ffaa33;
+  letter-spacing: 0.1em;
+  color: var(--color-led-amber);
   text-shadow:
-    0 0 12px rgba(255, 170, 51, 0.7),
-    0 0 25px rgba(255, 170, 51, 0.35);
-  line-height: 1.1;
+    0 0 12px rgba(255, 170, 51, 0.75),
+    0 0 24px rgba(255, 170, 51, 0.35);
+  line-height: 1.15;
+  word-break: keep-all;
+  white-space: nowrap;
 }
 
 .led-date {
   font-family: "Courier New", Courier, monospace;
-  font-size: 0.85rem;
+  font-size: clamp(0.72rem, 1.8vw, 0.86rem);
   letter-spacing: 0.08em;
   color: #ffd080;
   text-shadow: 0 0 8px rgba(255, 208, 128, 0.5);
-  margin-top: 2px;
+  margin-top: 3px;
 }
 
 .led-divider {
   width: 90%;
   height: 2px;
   background-color: #332200;
-  box-shadow: 0 0 4px #ffaa33;
+  box-shadow: 0 0 4px var(--color-led-amber);
   margin: 6px auto 10px auto;
 }
 
@@ -463,7 +525,7 @@ caption,
   width: 100%;
   overflow: hidden;
   white-space: nowrap;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.55);
   padding: 6px 0;
   border-radius: 4px;
 }
@@ -471,12 +533,12 @@ caption,
 .led-ticker-text {
   display: inline-block;
   font-family: "Courier New", Courier, monospace;
-  font-size: 1.15rem;
+  font-size: clamp(0.92rem, 2.2vw, 1.15rem);
   font-weight: bold;
   letter-spacing: 0.08em;
-  color: #ff3b30;
+  color: var(--color-led-red);
   text-shadow:
-    0 0 10px rgba(255, 59, 48, 0.7),
+    0 0 10px rgba(255, 59, 48, 0.75),
     0 0 20px rgba(255, 59, 48, 0.4);
   animation: scrollLeft 18s linear infinite;
   padding-left: 100%;
@@ -521,9 +583,21 @@ caption,
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background-color: #ff3b30;
+  background-color: var(--color-led-red);
   display: inline-block;
   animation: pulseDot 1.5s infinite;
+  flex-shrink: 0;
+}
+
+.preview-stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.stats-sep {
+  opacity: 0.5;
 }
 
 /* ==========================================================================
@@ -548,25 +622,23 @@ caption,
 }
 
 /* ==========================================================================
-   CONTAINER 2 (CARD-CARD CONTROLS)
-   Based on low.css .container2 & .card rules
+   CONTAINER 2 (CARD-CARD CONTROLS - 2 KOLOM RAPI)
+   Strict Requirement: Exactly matches 113238.png (2 Column Grid on Desktop/Tablet)
    ========================================================================== */
 .container2 {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2 Kolom Seimbang */
   gap: 24px;
   width: 100%;
-  flex-wrap: wrap;
-  margin-bottom: 30px;
+  margin-bottom: 28px;
 }
 
 /* CARD */
 .card {
-  flex: 1 1 280px;
-  padding: 24px;
+  padding: clamp(18px, 2.5vw, 24px);
   background-color: var(--color-card-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  min-height: 220px;
   box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
@@ -574,6 +646,7 @@ caption,
     transform 0.2s ease,
     box-shadow 0.2s ease,
     border-color 0.2s ease;
+  min-width: 0;
 }
 
 .card:hover {
@@ -590,10 +663,11 @@ caption,
 
 .card-icon {
   font-size: 1.25rem;
+  flex-shrink: 0;
 }
 
 .card h3 {
-  font-size: 1.15rem;
+  font-size: clamp(1.05rem, 1.4vw, 1.2rem);
   color: var(--color-secondary);
 }
 
@@ -619,6 +693,8 @@ caption,
   align-items: center;
   font-size: 0.82rem;
   margin-bottom: 4px;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
 .device-row:last-child {
@@ -637,9 +713,10 @@ caption,
   font-family: monospace;
   font-size: 0.75rem;
   background-color: var(--color-base);
-  padding: 1px 6px;
+  padding: 2px 6px;
   border-radius: 4px;
   border: 1px solid var(--color-border);
+  word-break: break-all;
 }
 
 .status-stack {
@@ -658,6 +735,10 @@ caption,
   font-size: 0.84rem;
   transition: background-color 0.3s ease;
   letter-spacing: 0.02em;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .online {
@@ -670,6 +751,93 @@ caption,
   color: var(--color-base);
 }
 
+/* ==========================================================================
+   CUSTOM POWER SLIDE / SWIPE SWITCH
+   Inactive: White bg, #3D2B1F outline (4px)
+   Circle/dot: White, #3D2B1F outline (6px)
+   Active: #966E53 bg, retaining 4px outline and circle/dot
+   ========================================================================== */
+.power-switch-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--color-accent);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 16px;
+  border: 1px solid var(--color-accent-dark);
+}
+
+.power-switch-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.power-title {
+  font-size: 0.86rem;
+  color: var(--color-secondary);
+  font-weight: 700;
+}
+
+.power-state-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--color-online);
+  letter-spacing: 0.05em;
+}
+
+.power-state-badge.off {
+  color: var(--color-offline);
+}
+
+.custom-slide-switch {
+  position: relative;
+  width: 72px;
+  height: 38px;
+  background-color: #ffffff;
+  border: 4px solid #3d2b1f;
+  border-radius: 38px;
+  cursor: pointer;
+  outline: none;
+  padding: 0;
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  touch-action: manipulation;
+}
+
+.custom-slide-switch .switch-dot {
+  position: absolute;
+  left: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  background-color: #ffffff;
+  border: 6px solid #3d2b1f;
+  border-radius: 50%;
+  box-sizing: border-box;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+/* Active State: Background #966E53 while retaining outline and circle/dot */
+.custom-slide-switch.active {
+  background-color: #be8c6a;
+  border: 4px solid #3d2b1f;
+}
+
+.custom-slide-switch.active .switch-dot {
+  transform: translate(34px, -50%);
+  background-color: #ffffff;
+  border: 6px solid #3d2b1f;
+}
+
 /* SLIDER CONTROLS */
 .slider-control-group {
   margin-bottom: 16px;
@@ -680,6 +848,8 @@ caption,
   justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 .form-label {
@@ -699,8 +869,8 @@ caption,
 /* CUSTOM RANGE SLIDER (Styling with #2c2c2c & #edeae0) */
 .form-range {
   width: 100%;
-  height: 8px;
-  border-radius: 5px;
+  height: 10px;
+  border-radius: 6px;
   background: var(--color-accent);
   outline: none;
   -webkit-appearance: none;
@@ -710,51 +880,57 @@ caption,
 .form-range::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   background-color: var(--color-secondary);
   border: 2px solid var(--color-base);
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
   cursor: pointer;
   transition:
     transform 0.1s ease,
     background-color 0.2s ease;
 }
 
-.form-range::-webkit-slider-thumb:hover {
+.form-range::-webkit-slider-thumb:hover,
+.form-range::-webkit-slider-thumb:active {
   transform: scale(1.15);
   background-color: var(--color-secondary-light);
 }
 
 .form-range::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   background-color: var(--color-secondary);
   border: 2px solid var(--color-base);
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
   cursor: pointer;
 }
 
 .preset-buttons {
-  display: flex;
-  gap: 6px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
   margin-bottom: 18px;
-  flex-wrap: wrap;
 }
 
 .btn-preset {
-  flex: 1;
-  padding: 7px 8px;
+  min-height: 38px;
+  padding: 8px 6px;
   border-radius: 6px;
   border: 1px solid var(--color-border);
   background-color: var(--color-accent);
   color: var(--color-secondary);
-  font-size: 0.74rem;
+  font-size: 0.82rem;
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .btn-preset:hover {
@@ -776,15 +952,76 @@ caption,
 .clock-display-val {
   display: block;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 1.8rem;
+  font-size: clamp(1.5rem, 2.5vw, 1.9rem);
   color: var(--color-secondary);
-  line-height: 1.1;
+  line-height: 1.15;
   letter-spacing: 0.05em;
 }
 
 .clock-timezone {
   font-size: 0.75rem;
   color: var(--color-text-muted);
+}
+
+/* TIMEZONE CONTROLS (CARD 3) */
+.timezone-input-wrap {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.timezone-num-input {
+  width: 75px !important;
+  text-align: center;
+  font-weight: 700;
+  padding: 8px !important;
+}
+
+.timezone-quick-pills {
+  display: flex;
+  gap: 6px;
+  flex: 1;
+  min-width: 140px;
+}
+
+.btn-tz-pill {
+  flex: 1;
+  padding: 8px 4px;
+  font-size: 0.74rem;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-accent);
+  color: var(--color-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  text-align: center;
+  font-weight: 700;
+}
+
+.btn-tz-pill:hover {
+  background-color: var(--color-secondary-light);
+  color: var(--color-base);
+}
+
+.btn-tz-pill.active {
+  background-color: var(--color-secondary);
+  color: var(--color-base);
+  border-color: var(--color-secondary);
+}
+
+/* MANUAL TIME GRID (CARD 3) */
+.manual-time-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.time-input-field,
+.date-input-field {
+  padding: 8px 10px;
+  font-size: 0.84rem;
 }
 
 .clock-options {
@@ -798,18 +1035,20 @@ caption,
 .checkbox-option {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.83rem;
+  gap: 10px;
+  font-size: 0.84rem;
   color: var(--color-secondary);
   cursor: pointer;
   user-select: none;
+  min-height: 30px;
 }
 
 .checkbox-option input[type="checkbox"] {
   accent-color: var(--color-secondary);
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 /* FORM CONTROLS IN CARD 4 */
@@ -834,7 +1073,7 @@ caption,
   border-radius: var(--radius-sm);
   background-color: var(--color-base);
   color: var(--color-secondary);
-  font-size: 0.86rem;
+  font-size: 16px;
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease;
@@ -851,17 +1090,21 @@ caption,
 /* CARD ACTION BUTTONS */
 .btn-card {
   margin-top: auto;
-  padding: 10px 16px;
+  min-height: 44px;
+  padding: 11px 18px;
   border: none;
   border-radius: var(--radius-sm);
   background-color: var(--color-secondary);
   color: var(--color-base);
-  font-size: 0.86rem;
+  font-size: 0.88rem;
   cursor: pointer;
   transition:
     background-color 0.2s ease,
     transform 0.1s ease;
   width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-card:hover {
@@ -876,9 +1119,10 @@ caption,
   background-color: var(--color-secondary);
   color: var(--color-base);
   border-radius: var(--radius-md);
-  padding: 24px 30px;
-  margin-bottom: 30px;
+  padding: clamp(18px, 2.5vw, 26px) clamp(18px, 3vw, 32px);
+  margin-bottom: 28px;
   box-shadow: var(--shadow-lg);
+  width: 100%;
 }
 
 .action-dock-inner {
@@ -889,30 +1133,38 @@ caption,
   gap: 18px;
 }
 
+.action-info {
+  flex: 1 1 300px;
+}
+
 .action-info h4 {
   color: var(--color-base);
-  font-size: 1.25rem;
+  font-size: clamp(1.1rem, 1.6vw, 1.3rem);
   margin-bottom: 4px;
 }
 
 .action-info p {
-  color: #b0b0b0;
+  color: #b8b8b8;
   font-size: 0.85rem;
-  max-width: 600px;
+  max-width: 650px;
 }
 
 .btn-send-main {
+  min-height: 50px;
   padding: 14px 28px;
   border: 2px solid var(--color-accent);
   border-radius: var(--radius-sm);
   background-color: var(--color-accent);
   color: var(--color-secondary);
-  font-size: 0.98rem;
+  font-size: 1rem;
   letter-spacing: 0.04em;
   cursor: pointer;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
   transition: all 0.2s ease;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-send-main:hover {
@@ -933,8 +1185,8 @@ caption,
 
 .panduan-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
   margin-top: 16px;
 }
 
@@ -962,7 +1214,7 @@ caption,
 
 .panduan-content strong {
   display: block;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   color: var(--color-secondary);
   margin-bottom: 4px;
 }
@@ -973,61 +1225,429 @@ caption,
 }
 
 /* ==========================================================================
-   RESPONSIVE LAYOUT (Based on low.css @media)
+   BREAKPOINTS & RESPONSIVE DESIGN
    ========================================================================== */
-@media (max-width: 900px) {
-  .header {
-    flex-direction: column;
-    align-items: flex-start;
+
+/* --------------------------------------------------------------------------
+   1. DESKTOP WIDE & STANDARD (>= 1025px)
+   -------------------------------------------------------------------------- */
+@media (min-width: 1025px) {
+  .sidebar {
+    width: var(--sidebar-width-desktop);
   }
-  .action-dock-inner {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .btn-send-main {
-    width: 100%;
+
+  .container2 {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
+/* --------------------------------------------------------------------------
+   2. TABLET INTERFACE (769px to 1024px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .sidebar {
+    width: var(--sidebar-width-tablet);
+    padding: 40px 14px 20px 14px;
+  }
+
+  .sidebar-logo {
+    max-width: 115px;
+  }
+
+  .sidebar-brand-title h2 {
+    font-size: 1.15rem;
+  }
+
+  .nav-link {
+    padding: 10px 12px;
+    font-size: 0.85rem;
+  }
+
+  .main {
+    padding: 26px 24px;
+  }
+
+  .container2 {
+    grid-template-columns: repeat(2, 1fr); /* 2 Kolom Seimbang di Tablet */
+    gap: 18px;
+  }
+
+  /* Responsive button sizes on Tablet */
+  .btn-sync-time,
+  .btn-refresh-conn {
+    padding: 9px 14px;
+    font-size: 0.82rem;
+    min-height: 38px;
+  }
+
+  .preset-buttons {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .btn-preset {
+    padding: 7px 4px;
+    font-size: 0.73rem;
+    min-height: 36px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .btn-card {
+    padding: 10px 14px;
+    font-size: 0.84rem;
+    min-height: 40px;
+  }
+
+  .btn-send-main {
+    padding: 12px 22px;
+    font-size: 0.92rem;
+    min-height: 46px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   3. MOBILE INTERFACE (<= 768px)
+   -------------------------------------------------------------------------- */
 @media (max-width: 768px) {
   .container1 {
     flex-direction: column;
   }
 
-  .sidebar {
-    width: 100%;
-    min-height: auto;
-    padding: 30px 20px 20px 20px;
+  /* TAMPILKAN MOBILE TOP BAR */
+  .mobile-navbar {
+    display: flex !important;
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--mobile-navbar-height);
+    background-color: var(--color-secondary);
+    color: var(--color-base);
+    padding: 0 16px;
+    z-index: 1000;
+    border-bottom: 1px solid var(--color-secondary-light);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+    align-items: center;
+    justify-content: space-between;
   }
 
-  .sidebar-logo {
-    max-width: 110px;
+  .mobile-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
   }
 
-  .sidebar nav {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
+  /* Menggunakan Logo.png normal pada mobile */
+  .mobile-logo-img {
+    max-height: 40px;
+    max-width: 100px;
+    object-fit: contain;
+    display: block;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
   }
 
-  .nav-link {
-    padding: 8px 12px;
-    font-size: 0.82rem;
-  }
-
-  .main {
-    padding: 20px 16px;
-  }
-
-  .container2 {
+  .mobile-brand-info {
+    display: flex;
     flex-direction: column;
   }
 
-  .card {
+  .mobile-brand-title {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 1.05rem;
+    color: var(--color-base);
+    line-height: 1.1;
+  }
+
+  .mobile-brand-sub {
+    font-size: 0.62rem;
+    color: var(--color-accent);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .mobile-nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .mobile-status-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background-color: var(--color-secondary-light);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    color: #d0d0d0;
+  }
+
+  /* HAMBURGER BUTTON — Sangat Jelas & Kontras Tinggi */
+  .mobile-menu-btn {
+    width: 44px;
+    height: 44px;
+    background-color: var(--color-secondary-light);
+    border: 1px solid rgba(237, 234, 224, 0.4);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex !important;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    padding: 8px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    transition: background-color 0.2s ease;
+  }
+
+  .mobile-menu-btn:hover,
+  .mobile-menu-btn:active {
+    background-color: #4a4a4a;
+  }
+
+  .hamburger-bar {
+    width: 22px;
+    height: 3px;
+    background-color: #fdfdfd !important;
+    border-radius: 2px;
+    display: block !important;
+    transition:
+      transform 0.3s ease,
+      opacity 0.3s ease;
+  }
+
+  /* Animasi Hamburger saat drawer terbuka */
+  .sidebar-open .mobile-menu-btn .hamburger-bar:nth-child(1) {
+    transform: translateY(8px) rotate(45deg);
+  }
+  .sidebar-open .mobile-menu-btn .hamburger-bar:nth-child(2) {
+    opacity: 0;
+  }
+  .sidebar-open .mobile-menu-btn .hamburger-bar:nth-child(3) {
+    transform: translateY(-8px) rotate(-45deg);
+  }
+
+  /* BACKDROP OVERLAY */
+  .sidebar-backdrop {
+    display: block !important;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    z-index: 1100;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 0.3s ease,
+      visibility 0.3s ease;
+  }
+
+  .sidebar-open .sidebar-backdrop {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* SIDEBAR DRAWER */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: min(300px, 82vw);
+    height: 100vh;
+    padding: 40px 20px 24px 20px;
+    z-index: 1200;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 4px 0 25px rgba(0, 0, 0, 0.4);
+  }
+
+  .sidebar-open .sidebar {
+    transform: translateX(0);
+  }
+
+  /* TOMBOL TUTUP DRAWER (Hanya di Layar Mobile) */
+  .sidebar-close-btn {
+    display: flex !important;
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: var(--color-secondary-light);
+    color: var(--color-base);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 1rem;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+  }
+
+  .main {
+    padding: 18px 14px;
+  }
+
+  /* HEADER DI MOBILE */
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+  }
+
+  .header-text {
+    flex: initial !important;
     width: 100%;
   }
 
+  .header-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    width: 100%;
+  }
+
+  /* RESPONSIVE BUTTONS DI MOBILE */
+  .btn-sync-time,
+  .btn-refresh-conn {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 0.88rem;
+    min-height: 44px;
+  }
+
+  .btn-card {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 0.9rem;
+    min-height: 46px;
+  }
+
+  .btn-preset {
+    padding: 10px 6px;
+    font-size: 0.78rem;
+    min-height: 42px;
+  }
+
+  .btn-send-main {
+    width: 100%;
+    padding: 14px 20px;
+    font-size: 0.96rem;
+    min-height: 48px;
+  }
+
+  .nav-link {
+    padding: 14px 18px;
+    font-size: 0.95rem;
+    min-height: 48px;
+  }
+
+  /* PREVIEW PANEL DI MOBILE */
+  .preview-panel {
+    padding: 14px 12px;
+    margin-bottom: 20px;
+  }
+
+  .preview-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .led-screen-outer {
+    padding: 8px;
+    border-width: 3px;
+  }
+
+  .led-screen-display {
+    padding: 14px 8px;
+  }
+
   .led-time {
-    font-size: 2rem;
+    font-size: clamp(1.75rem, 7.5vw, 2.3rem);
+    letter-spacing: 0.08em;
+  }
+
+  .led-date {
+    font-size: clamp(0.7rem, 2.8vw, 0.82rem);
+  }
+
+  .led-ticker-text {
+    font-size: clamp(0.9rem, 3.8vw, 1.05rem);
+  }
+
+  .preview-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  /* KARTU KONTROL DI MOBILE: 1 Kolom Penuh */
+  .container2 {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .card {
+    padding: 18px 16px;
+  }
+
+  /* ACTION DOCK DI MOBILE */
+  .action-dock {
+    padding: 20px 16px;
+    margin-bottom: 20px;
+  }
+
+  .action-dock-inner {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .action-info {
+    flex: initial !important;
+    width: 100%;
+  }
+
+  .action-info p {
+    margin-bottom: 12px;
+  }
+
+  /* PANDUAN GRID DI MOBILE */
+  .panduan-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   4. EXTRA SMALL PHONES (<= 400px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 400px) {
+  .mobile-brand-title {
+    font-size: 0.95rem;
+  }
+
+  .led-time {
+    font-size: 1.6rem;
+    letter-spacing: 0.06em;
+  }
+
+  .preset-buttons {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .btn-preset {
+    font-size: 0.76rem;
   }
 }
