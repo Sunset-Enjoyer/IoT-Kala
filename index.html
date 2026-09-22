@@ -102,15 +102,15 @@
             class="nav-link active"
             data-section="preview-section"
           >
-            <span class="nav-icon">🕒</span>
+            <span class="nav-icon"></span>
             <span>Live Display</span>
           </a>
           <a href="#dashboard" class="nav-link" data-section="dashboard">
-            <span class="nav-icon">📊</span>
+            <span class="nav-icon"></span>
             <span>Dashboard</span>
           </a>
           <a href="#panduan" class="nav-link" data-section="panduan">
-            <span class="nav-icon">📖</span>
+            <span class="nav-icon"></span>
             <span>Panduan</span>
           </a>
         </nav>
@@ -121,7 +121,7 @@
             <span class="indicator-dot" id="sidebarDot"></span>
             <span id="sidebarStatusText">Sistem Siap</span>
           </div>
-          <p class="sidebar-version">&copy; 2026 Kala.Clock v2.0</p>
+          <p class="sidebar-version">&copy; 2026 Kala.Clock</p>
         </div>
       </aside>
 
@@ -140,7 +140,7 @@
               onclick="sinkronWaktu()"
               title="Sinkronisasi waktu lokal perangkat ke modul jam IoT"
             >
-              ⏰ Sinkron Waktu Otomatis
+              Sinkron Waktu Otomatis
             </button>
             <button
               type="button"
@@ -151,7 +151,7 @@
               "
               title="Perbarui koneksi broker MQTT dan status database"
             >
-              🔄 Refresh Koneksi
+              Refresh Koneksi
             </button>
           </div>
         </header>
@@ -257,13 +257,13 @@
               <!-- STATUS BADGES -->
               <div class="status-stack">
                 <div id="statusMQTT" class="status-box offline">
-                  🌐 BROKER: OFFLINE
+                  BROKER: OFFLINE
                 </div>
                 <div id="statusAlat" class="status-box offline">
-                  📟 ALAT P10: OFFLINE
+                  ALAT P10: OFFLINE
                 </div>
                 <div id="statusDB" class="status-box offline">
-                  🗄️ DATABASE MYSQL: MENGHUBUNGKAN...
+                  DATABASE MYSQL: DISCONNECTED
                 </div>
               </div>
 
@@ -275,7 +275,7 @@
             <!-- CARD 2: KECERAHAN LAYAR & SAKLAR DAYA -->
             <div class="card" id="card-kecerahan">
               <div class="card-header-icon">
-                <span class="card-icon">☀️</span>
+                <span class="card-icon"></span>
                 <h3>Kecerahan &amp; Daya Layar</h3>
               </div>
               <p class="card-desc">
@@ -329,21 +329,21 @@
                   class="btn-preset"
                   onclick="setBrightnessPreset(15)"
                 >
-                  🌙 Redup (15)
+                  Redup (15)
                 </button>
                 <button
                   type="button"
                   class="btn-preset"
                   onclick="setBrightnessPreset(80)"
                 >
-                  🌤️ Sedang (80)
+                  Sedang (80)
                 </button>
                 <button
                   type="button"
                   class="btn-preset"
                   onclick="setBrightnessPreset(200)"
                 >
-                  ☀️ Terang (200)
+                  Terang (200)
                 </button>
               </div>
 
@@ -359,7 +359,7 @@
             <!-- CARD 3: PENGATURAN JAM IOT, RTC & ZONA WAKTU -->
             <div class="card" id="card-jam">
               <div class="card-header-icon">
-                <span class="card-icon">⏰</span>
+                <span class="card-icon"></span>
                 <h3>Pengaturan Jam IoT &amp; RTC</h3>
               </div>
               <p class="card-desc">
@@ -473,14 +473,14 @@
                 class="btn-card"
                 onclick="terapkanWaktuManual()"
               >
-                💾 Terapkan Waktu ke RTC
+                Terapkan Waktu ke RTC
               </button>
             </div>
 
             <!-- CARD 4: TAMPILAN PESAN & RUNNING TEXT -->
             <div class="card" id="card-runningtext">
               <div class="card-header-icon">
-                <span class="card-icon">📝</span>
+                <span class="card-icon"></span>
                 <h3>Tampilan Running Text</h3>
               </div>
               <p class="card-desc">
@@ -565,7 +565,7 @@ Selamat Datang di Kala.Clock IoT Smart Display — Silakan Masukkan Pesan Anda</
                   class="btn-send-main"
                   onclick="kirimData()"
                 >
-                  ⚡ KIRIM REAL-TIME (MQTT)
+                  KIRIM REAL-TIME
                 </button>
               </div>
             </div>
@@ -576,7 +576,7 @@ Selamat Datang di Kala.Clock IoT Smart Display — Silakan Masukkan Pesan Anda</
              3. PANDUAN SECTION
         ================================= -->
         <section class="card panduan-card" id="panduan">
-          <h3>📖 Panduan Penggunaan Kala.Clock</h3>
+          <h3>Panduan Penggunaan Kala.Clock</h3>
           <div class="panduan-grid">
             <div class="panduan-item">
               <div class="panduan-num">1</div>
@@ -604,7 +604,7 @@ Selamat Datang di Kala.Clock IoT Smart Display — Silakan Masukkan Pesan Anda</
               <div class="panduan-content">
                 <strong>Kirim Real-Time</strong>
                 <p>
-                  Tekan tombol <strong>"⚡ KIRIM REAL-TIME"</strong>. Pengaturan
+                  Tekan tombol <strong>" KIRIM REAL-TIME"</strong>. Pengaturan
                   akan terkirim instan tanpa reload halaman dan disimpan
                   otomatis.
                 </p>

@@ -27,8 +27,8 @@ try {
 if (mqttClient) {
   mqttClient.onConnectionLost = function (responseObject) {
     console.log("MQTT Connection Lost:", responseObject.errorMessage);
-    updateStatusBadge("statusMQTT", "offline", "🌐 BROKER: OFFLINE");
-    updateStatusBadge("statusAlat", "offline", "📟 ALAT P10: OFFLINE");
+    updateStatusBadge("statusMQTT", "offline", " BROKER: OFFLINE");
+    updateStatusBadge("statusAlat", "offline", " ALAT P10: OFFLINE");
     updateSidebarStatus(false);
 
     // Coba hubungkan kembali otomatis setelah 3 detik
@@ -45,10 +45,10 @@ if (mqttClient) {
 
     if (message.destinationName === mqtt_topic_status) {
       if (message.payloadString === "online") {
-        updateStatusBadge("statusAlat", "online", "📟 ALAT P10: ONLINE");
+        updateStatusBadge("statusAlat", "online", " ALAT P10: ONLINE");
         updateSidebarStatus(true);
       } else if (message.payloadString === "offline") {
-        updateStatusBadge("statusAlat", "offline", "📟 ALAT P10: OFFLINE");
+        updateStatusBadge("statusAlat", "offline", " ALAT P10: OFFLINE");
       }
     }
   };
@@ -61,7 +61,7 @@ function connectMQTT() {
   // Update status menjadi menghubungkan
   const mqttEl = document.getElementById("statusMQTT");
   if (mqttEl) {
-    mqttEl.innerHTML = "🌐 BROKER: MENGHUBUNGKAN...";
+    mqttEl.innerHTML = "BROKER: CONNECTING...";
     mqttEl.className = "status-box offline";
   }
 
@@ -71,7 +71,7 @@ function connectMQTT() {
     keepAliveInterval: 30,
     onSuccess: function () {
       console.log("Berhasil terhubung ke Broker MQTT:", mqtt_broker);
-      updateStatusBadge("statusMQTT", "online", "🌐 BROKER: ONLINE");
+      updateStatusBadge("statusMQTT", "online", "BROKER: ONLINE");
       updateSidebarStatus(true);
 
       // Subscribe ke topik status alat
@@ -83,7 +83,7 @@ function connectMQTT() {
     },
     onFailure: function (err) {
       console.error("Gagal terhubung ke MQTT:", err.errorMessage);
-      updateStatusBadge("statusMQTT", "offline", "🌐 BROKER: GAGAL KONEK");
+      updateStatusBadge("statusMQTT", "offline", "BROKER: DISCONNECTED");
       updateSidebarStatus(false);
       setTimeout(connectMQTT, 5000);
     },
@@ -92,13 +92,17 @@ function connectMQTT() {
 
 // --- 2. CEK STATUS DATABASE MYSQL (Dari index2.html) ---
 function cekDatabase() {
-  fetch("api_status_db.php")
+  fetch('assets/api/api_status_db.php')
     .then((response) => response.json())
     .then((data) => {
       if (data.status === "online") {
-        updateStatusBadge("statusDB", "online", "🗄️ DATABASE MYSQL: TERHUBUNG");
+        updateStatusBadge("statusDB", "online", "DATABASE MYSQL: CONNECTED");
       } else {
-        updateStatusBadge("statusDB", "offline", "🗄️ DATABASE MYSQL: TERPUTUS");
+        updateStatusBadge(
+          "statusDB",
+          "offline",
+          "DATABASE MYSQL: DISCONNECTED",
+        );
       }
     })
     .catch(() => {
@@ -106,14 +110,14 @@ function cekDatabase() {
       const dbEl = document.getElementById("statusDB");
       if (dbEl) {
         dbEl.className = "status-box offline";
-        dbEl.innerHTML = "🗄️ DATABASE MYSQL: LOKAL (SIAP DIGUNAKAN)";
+        dbEl.innerHTML = "DATABASE MYSQL: Aiven.Io (READY TO CONNECT)";
       }
     });
 }
 
 // --- 3. AMBIL DATA TERAKHIR DARI DATABASE (Dari index2.html) ---
 function loadSavedData() {
-  fetch("api_baca.php")
+  fetch('assets/api/api_baca.php')
     .then((response) => response.json())
     .then((data) => {
       if (data) {
@@ -177,10 +181,10 @@ function kirimData() {
   if (pesanEl) {
     if (mqttSent) {
       pesanEl.innerHTML =
-        "✅ Berhasil dikirim ke Panel Kala.Clock secara Real-Time via MQTT!";
+        "Berhasil dikirim ke Panel Kala.Clock secara Real-Time via MQTT!";
     } else {
       pesanEl.innerHTML =
-        "⚠️ Pengaturan diterapkan pada Simulasi (MQTT sedang offline / mencoba hubungkan...)";
+        "Pengaturan diterapkan pada Simulasi (MQTT sedang offline / mencoba hubungkan...)";
     }
   }
 
@@ -191,7 +195,7 @@ function kirimData() {
   formData.append("speed", payloadObj.speed);
   formData.append("mode", payloadObj.mode);
 
-  fetch("api_simpan.php", {
+  fetch('assets/api/api_simpan.php', {
     method: "POST",
     body: formData,
   }).catch(() => {
@@ -311,8 +315,8 @@ function kirimPowerMqtt(brightnessVal, powerVal) {
 function updateClock() {
   const now = new Date();
   // Kalkulasi waktu berdasarkan zona waktu pilihan (UTC + timezoneOffset)
-  const utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
-  const targetTime = new Date(utcMs + (3600000 * timezoneOffset));
+  const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
+  const targetTime = new Date(utcMs + 3600000 * timezoneOffset);
 
   let hours = targetTime.getHours();
   const minutes = String(targetTime.getMinutes()).padStart(2, "0");
@@ -422,7 +426,7 @@ function terapkanKecerahanLangsung() {
 
   const pesanEl = document.getElementById("pesan");
   if (pesanEl) {
-    pesanEl.innerHTML = `☀️ Kecerahan layar diatur ke <strong>${brightnessVal}</strong> (${isPowerOn ? "Layar Aktif" : "Layar Mati"})!`;
+    pesanEl.innerHTML = ` Kecerahan layar diatur ke <strong>${brightnessVal}</strong> (${isPowerOn ? "Layar Aktif" : "Layar Mati"})!`;
     setTimeout(() => {
       pesanEl.innerHTML = "";
     }, 3500);
@@ -524,8 +528,8 @@ function terapkanWaktuManual() {
   if (pesanEl) {
     const tzSign = timezoneOffset >= 0 ? "+" : "";
     pesanEl.innerHTML = sent
-      ? `⏰ Jam & Tanggal manual (${timeVal}, ${dateVal}, UTC${tzSign}${timezoneOffset}) berhasil dikirim ke RTC modul!`
-      : `⏰ Jam manual (${timeVal}) diterapkan di simulasi (Broker MQTT offline).`;
+      ? ` Jam & Tanggal manual (${timeVal}, ${dateVal}, UTC${tzSign}${timezoneOffset}) berhasil dikirim ke RTC modul!`
+      : ` Jam manual (${timeVal}) diterapkan di simulasi (Broker MQTT offline).`;
     setTimeout(() => {
       pesanEl.innerHTML = "";
     }, 3500);
@@ -754,7 +758,10 @@ function setupScrollSpy() {
       }
     });
 
-    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 60) {
+    if (
+      window.innerHeight + window.scrollY >=
+      document.body.offsetHeight - 60
+    ) {
       if (sections.length > 0) {
         currentSectionId = sections[sections.length - 1].getAttribute("id");
       }
