@@ -11,7 +11,7 @@
 // --- 1. KONFIGURASI MQTT (Dari index2.html) ---
 const mqtt_broker = "broker.emqx.io"; // Broker EMQX publik gratis & cepat
 const mqtt_port = 8084; // Port WebSockets dengan SSL (Secure)
-const mqtt_topic = "kc-01"; // Topik komunikasi data panel/jam
+const mqtt_topic = "kc-01/data"; // Topik komunikasi data panel/jam
 const mqtt_topic_status = "kc-01"; // Topik status alat online/offline
 const client_id = "kala_clock_" + Math.random().toString(16).substr(2, 8);
 
