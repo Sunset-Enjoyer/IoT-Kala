@@ -27,8 +27,8 @@ try {
 if (mqttClient) {
   mqttClient.onConnectionLost = function (responseObject) {
     console.log("MQTT Connection Lost:", responseObject.errorMessage);
-    updateStatusBadge("statusMQTT", "offline", "🌐 BROKER: OFFLINE");
-    updateStatusBadge("statusAlat", "offline", "📟 ALAT P10: OFFLINE");
+    updateStatusBadge("statusMQTT", "offline", "BROKER: OFFLINE");
+    updateStatusBadge("statusAlat", "offline", "ALAT P10: OFFLINE");
     updateSidebarStatus(false);
 
     // Coba hubungkan kembali otomatis setelah 3 detik
@@ -46,10 +46,10 @@ if (mqttClient) {
     if (message.destinationName === mqtt_topic_status) {
       const payload = message.payloadString.trim().toLowerCase();
       if (payload === "online") {
-        updateStatusBadge("statusAlat", "online", "📟 ALAT P10: ONLINE");
+        updateStatusBadge("statusAlat", "online", "ALAT P10: ONLINE");
         updateSidebarStatus(true);
       } else if (payload === "offline") {
-        updateStatusBadge("statusAlat", "offline", "📟 ALAT P10: OFFLINE");
+        updateStatusBadge("statusAlat", "offline", "ALAT P10: OFFLINE");
         updateSidebarStatus(false);
       }
     }
