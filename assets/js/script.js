@@ -38,8 +38,8 @@ function pingDevice() {
 if (mqttClient) {
   mqttClient.onConnectionLost = function (responseObject) {
     console.log("MQTT Connection Lost:", responseObject.errorMessage);
-    updateStatusBadge("statusMQTT", "offline", "🌐 BROKER: OFFLINE");
-    updateStatusBadge("statusAlat", "offline", "📟 ALAT P10: OFFLINE");
+    updateStatusBadge("statusMQTT", "offline", "BROKER: OFFLINE");
+    updateStatusBadge("statusAlat", "offline", "ALAT P10: OFFLINE");
     updateSidebarStatus(false);
 
     // Coba hubungkan kembali otomatis setelah 3 detik
@@ -61,10 +61,10 @@ if (mqttClient) {
     ) {
       const payload = message.payloadString.trim().toLowerCase();
       if (payload === "online") {
-        updateStatusBadge("statusAlat", "online", "📟 ALAT P10: ONLINE");
+        updateStatusBadge("statusAlat", "online", "ALAT P10: ONLINE");
         updateSidebarStatus(true);
       } else if (payload === "offline") {
-        updateStatusBadge("statusAlat", "offline", "📟 ALAT P10: OFFLINE");
+        updateStatusBadge("statusAlat", "offline", "ALAT P10: OFFLINE");
         updateSidebarStatus(false);
       }
     }
@@ -78,14 +78,17 @@ function connectMQTT() {
   // Update status menjadi menghubungkan
   const mqttEl = document.getElementById("statusMQTT");
   if (mqttEl) {
-    mqttEl.innerHTML = "🌐 BROKER: MENGHUBUNGKAN...";
+    mqttEl.innerHTML = "BROKER: MENGHUBUNGKAN...";
     mqttEl.className = "status-box offline";
   }
 
   const pesanEl = document.getElementById("pesan");
   if (pesanEl) {
-    pesanEl.innerHTML = "🔄 Memeriksa koneksi Broker MQTT & memanggil Alat P10...";
-    setTimeout(() => { if (pesanEl) pesanEl.innerHTML = ""; }, 3000);
+    pesanEl.innerHTML =
+      "🔄 Memeriksa koneksi Broker MQTT & memanggil Alat P10...";
+    setTimeout(() => {
+      if (pesanEl) pesanEl.innerHTML = "";
+    }, 3000);
   }
 
   mqttClient.connect({
@@ -94,7 +97,7 @@ function connectMQTT() {
     keepAliveInterval: 30,
     onSuccess: function () {
       console.log("Berhasil terhubung ke Broker MQTT:", mqtt_broker);
-      updateStatusBadge("statusMQTT", "online", "🌐 BROKER: ONLINE");
+      updateStatusBadge("statusMQTT", "online", "BROKER: ONLINE");
 
       // Subscribe ke topik status alat (utama dan alternatif)
       mqttClient.subscribe(mqtt_topic_status, {
@@ -109,8 +112,8 @@ function connectMQTT() {
     },
     onFailure: function (err) {
       console.error("Gagal terhubung ke MQTT:", err.errorMessage);
-      updateStatusBadge("statusMQTT", "offline", "🌐 BROKER: GAGAL KONEK");
-      updateStatusBadge("statusAlat", "offline", "📟 ALAT P10: OFFLINE");
+      updateStatusBadge("statusMQTT", "offline", "BROKER: GAGAL KONEK");
+      updateStatusBadge("statusAlat", "offline", "ALAT P10: OFFLINE");
       updateSidebarStatus(false);
       setTimeout(connectMQTT, 5000);
     },
@@ -119,13 +122,17 @@ function connectMQTT() {
 
 // --- 2. CEK STATUS DATABASE MYSQL (Dari index2.html) ---
 function cekDatabase() {
-  fetch('api/api_status_db.php')
+  fetch("/api/api_status_db.php")
     .then((response) => response.json())
     .then((data) => {
       if (data.status === "online") {
         updateStatusBadge("statusDB", "online", "DATABASE MYSQL: CONNECTED");
       } else {
-        updateStatusBadge("statusDB", "offline", "DATABASE MYSQL: DISCONNECTED");
+        updateStatusBadge(
+          "statusDB",
+          "offline",
+          "DATABASE MYSQL: DISCONNECTED",
+        );
       }
     })
     .catch(() => {
@@ -140,7 +147,7 @@ function cekDatabase() {
 
 // --- 3. AMBIL DATA TERAKHIR DARI DATABASE (Dari index2.html) ---
 function loadSavedData() {
-  fetch('api/api_baca.php')
+  fetch("/api/api_baca.php")
     .then((response) => response.json())
     .then((data) => {
       if (data) {
@@ -218,7 +225,7 @@ function kirimData() {
   formData.append("speed", payloadObj.speed);
   formData.append("mode", payloadObj.mode);
 
-  fetch('api/api_simpan.php', {
+  fetch("/api/api_simpan.php", {
     method: "POST",
     body: formData,
   }).catch(() => {
@@ -338,8 +345,8 @@ function kirimPowerMqtt(brightnessVal, powerVal) {
 function updateClock() {
   const now = new Date();
   // Kalkulasi waktu berdasarkan zona waktu pilihan (UTC + timezoneOffset)
-  const utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
-  const targetTime = new Date(utcMs + (3600000 * timezoneOffset));
+  const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
+  const targetTime = new Date(utcMs + 3600000 * timezoneOffset);
 
   let hours = targetTime.getHours();
   const minutes = String(targetTime.getMinutes()).padStart(2, "0");
@@ -781,7 +788,10 @@ function setupScrollSpy() {
       }
     });
 
-    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 60) {
+    if (
+      window.innerHeight + window.scrollY >=
+      document.body.offsetHeight - 60
+    ) {
       if (sections.length > 0) {
         currentSectionId = sections[sections.length - 1].getAttribute("id");
       }
