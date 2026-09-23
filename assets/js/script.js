@@ -1,4 +1,4 @@
-// ====================================================================
+﻿// ====================================================================
 // KALA.CLOCK — FULLY RESPONSIVE IOT CONTROLLER JAVASCRIPT
 // Menggabungkan fungsi-fungsi dari index2.html:
 // - Koneksi MQTT Real-Time (Paho MQTT via WebSockets SSL)
@@ -96,9 +96,9 @@ function cekDatabase() {
     .then((response) => response.json())
     .then((data) => {
       if (data.status === "online") {
-        updateStatusBadge("statusDB", "online", "DATABASE MYSQL: TERHUBUNG");
+        updateStatusBadge("statusDB", "online", "DATABASE MYSQL: CONNECTED");
       } else {
-        updateStatusBadge("statusDB", "offline", "DATABASE MYSQL: TERPUTUS");
+        updateStatusBadge("statusDB", "offline", "DATABASE MYSQL: DISCONNECTED");
       }
     })
     .catch(() => {
@@ -106,7 +106,7 @@ function cekDatabase() {
       const dbEl = document.getElementById("statusDB");
       if (dbEl) {
         dbEl.className = "status-box offline";
-        dbEl.innerHTML = "🗄️ DATABASE MYSQL: LOKAL (SIAP DIGUNAKAN)";
+        dbEl.innerHTML = "DATABASE MYSQL: Aiven.Io Ready To Use";
       }
     });
 }
@@ -311,8 +311,8 @@ function kirimPowerMqtt(brightnessVal, powerVal) {
 function updateClock() {
   const now = new Date();
   // Kalkulasi waktu berdasarkan zona waktu pilihan (UTC + timezoneOffset)
-  const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
-  const targetTime = new Date(utcMs + 3600000 * timezoneOffset);
+  const utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
+  const targetTime = new Date(utcMs + (3600000 * timezoneOffset));
 
   let hours = targetTime.getHours();
   const minutes = String(targetTime.getMinutes()).padStart(2, "0");
@@ -754,10 +754,7 @@ function setupScrollSpy() {
       }
     });
 
-    if (
-      window.innerHeight + window.scrollY >=
-      document.body.offsetHeight - 60
-    ) {
+    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 60) {
       if (sections.length > 0) {
         currentSectionId = sections[sections.length - 1].getAttribute("id");
       }
