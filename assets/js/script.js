@@ -1,4 +1,4 @@
-﻿// ====================================================================
+// ====================================================================
 // KALA.CLOCK — FULLY RESPONSIVE IOT CONTROLLER JAVASCRIPT
 // Menggabungkan fungsi-fungsi dari index2.html:
 // - Koneksi MQTT Real-Time (Paho MQTT via WebSockets SSL)
@@ -11,8 +11,8 @@
 // --- 1. KONFIGURASI MQTT (Dari index2.html) ---
 const mqtt_broker = "broker.emqx.io"; // Broker EMQX publik gratis & cepat
 const mqtt_port = 8084; // Port WebSockets dengan SSL (Secure)
-const mqtt_topic = "sekolah/iot/p10/data"; // Topik komunikasi data & perintah ke ESP8266
-const mqtt_topic_status = "sekolah/iot/p10/status"; // Topik status online/offline ESP8266
+const mqtt_topic = "sekolah/iot/p10/data"; // Topik komunikasi data panel/jam
+const mqtt_topic_status = "sekolah/iot/p10/status"; // Topik status alat online/offline
 const client_id = "kala_clock_" + Math.random().toString(16).substr(2, 8);
 
 // Inisialisasi MQTT Client Paho
@@ -44,13 +44,11 @@ if (mqttClient) {
     );
 
     if (message.destinationName === mqtt_topic_status) {
-      const payload = message.payloadString.trim().toLowerCase();
-      if (payload === "online") {
+      if (message.payloadString === "online") {
         updateStatusBadge("statusAlat", "online", "ALAT P10: ONLINE");
         updateSidebarStatus(true);
-      } else if (payload === "offline") {
+      } else if (message.payloadString === "offline") {
         updateStatusBadge("statusAlat", "offline", "ALAT P10: OFFLINE");
-        updateSidebarStatus(false);
       }
     }
   };
@@ -98,13 +96,9 @@ function cekDatabase() {
     .then((response) => response.json())
     .then((data) => {
       if (data.status === "online") {
-        updateStatusBadge("statusDB", "online", "DATABASE MYSQL: CONNECTED");
+        updateStatusBadge("statusDB", "online", "DATABASE MYSQL: TERHUBUNG");
       } else {
-        updateStatusBadge(
-          "statusDB",
-          "offline",
-          "DATABASE MYSQL: DISCONNECTED",
-        );
+        updateStatusBadge("statusDB", "offline", "DATABASE MYSQL: TERPUTUS");
       }
     })
     .catch(() => {
@@ -112,7 +106,7 @@ function cekDatabase() {
       const dbEl = document.getElementById("statusDB");
       if (dbEl) {
         dbEl.className = "status-box offline";
-        dbEl.innerHTML = "DATABASE MYSQL: Aiven.Io (READY TO CONNECT)";
+        dbEl.innerHTML = "🗄️ DATABASE MYSQL: LOKAL (SIAP DIGUNAKAN)";
       }
     });
 }
@@ -237,7 +231,7 @@ function sinkronWaktu() {
   const pesanEl = document.getElementById("pesan");
   if (pesanEl) {
     const tzSign = timezoneOffset >= 0 ? "+" : "";
-    pesanEl.innerHTML = `⏰ Waktu Kala.Clock berhasil disinkronkan ke <strong>${timeStr}</strong> (UTC${tzSign}${timezoneOffset})!`;
+    pesanEl.innerHTML = `Waktu Kala.Clock berhasil disinkronkan ke <strong>${timeStr}</strong> (UTC${tzSign}${timezoneOffset})!`;
     setTimeout(() => {
       pesanEl.innerHTML = "";
     }, 3500);
@@ -428,7 +422,7 @@ function terapkanKecerahanLangsung() {
 
   const pesanEl = document.getElementById("pesan");
   if (pesanEl) {
-    pesanEl.innerHTML = ` Kecerahan layar diatur ke <strong>${brightnessVal}</strong> (${isPowerOn ? "Layar Aktif" : "Layar Mati"})!`;
+    pesanEl.innerHTML = `Kecerahan layar diatur ke <strong>${brightnessVal}</strong> (${isPowerOn ? "Layar Aktif" : "Layar Mati"})!`;
     setTimeout(() => {
       pesanEl.innerHTML = "";
     }, 3500);
@@ -530,8 +524,8 @@ function terapkanWaktuManual() {
   if (pesanEl) {
     const tzSign = timezoneOffset >= 0 ? "+" : "";
     pesanEl.innerHTML = sent
-      ? ` Jam & Tanggal manual (${timeVal}, ${dateVal}, UTC${tzSign}${timezoneOffset}) berhasil dikirim ke RTC modul!`
-      : ` Jam manual (${timeVal}) diterapkan di simulasi (Broker MQTT offline).`;
+      ? `Jam & Tanggal manual (${timeVal}, ${dateVal}, UTC${tzSign}${timezoneOffset}) berhasil dikirim ke RTC modul!`
+      : `Jam manual (${timeVal}) diterapkan di simulasi (Broker MQTT offline).`;
     setTimeout(() => {
       pesanEl.innerHTML = "";
     }, 3500);
