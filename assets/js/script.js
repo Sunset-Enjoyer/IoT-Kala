@@ -1,4 +1,4 @@
-﻿// ====================================================================
+// ====================================================================
 // KALA.CLOCK — FULLY RESPONSIVE IOT CONTROLLER JAVASCRIPT
 // Menggabungkan fungsi-fungsi dari index2.html:
 // - Koneksi MQTT Real-Time (Paho MQTT via WebSockets SSL)
@@ -8,11 +8,11 @@
 // - Penanganan Navigasi Responsif Mobile, Tablet, & Desktop
 // ====================================================================
 
-// --- 1. KONFIGURASI MQTT (Dari index2.html) ---
+// --- 1. KONFIGURASI MQTT ---
 const mqtt_broker = "broker.emqx.io"; // Broker EMQX publik gratis & cepat
-const mqtt_port = 8884; // Port WebSockets dengan SSL (Secure)
-const mqtt_topic = "sekolah/iot/p10/data"; // Topik komunikasi data panel/jam
-const mqtt_topic_status = "sekolah/iot/p10/status"; // Topik status alat online/offline
+const mqtt_port = 8084; // Port WebSockets dengan SSL (Secure)
+const mqtt_topic = "kc-01"; // Topik komunikasi data & perintah ke ESP8266
+const mqtt_topic_status = "kc-01/status"; // Topik status online/offline ESP8266
 const client_id = "kala_clock_" + Math.random().toString(16).substr(2, 8);
 
 // Inisialisasi MQTT Client Paho
@@ -21,6 +21,17 @@ try {
   mqttClient = new Paho.MQTT.Client(mqtt_broker, mqtt_port, client_id);
 } catch (e) {
   console.warn("Paho MQTT library belum termuat:", e);
+}
+
+// Fungsi Ping untuk memeriksa apakah alat P10 aktif merespons
+function pingDevice() {
+  if (mqttClient && mqttClient.isConnected()) {
+    const pingObj = { action: "ping", timestamp: Date.now() };
+    const pingMsg = new Paho.MQTT.Message(JSON.stringify(pingObj));
+    pingMsg.destinationName = mqtt_topic;
+    mqttClient.send(pingMsg);
+    console.log("Ping dikirim ke alat P10 via:", mqtt_topic);
+  }
 }
 
 // Handler Jika Koneksi MQTT Terputus
@@ -43,12 +54,18 @@ if (mqttClient) {
       message.payloadString,
     );
 
-    if (message.destinationName === mqtt_topic_status) {
-      if (message.payloadString === "online") {
+    // Dengarkan status dari topik utama maupun topik alternatif
+    if (
+      message.destinationName === mqtt_topic_status ||
+      message.destinationName === "sekolah/iot/p10/status"
+    ) {
+      const payload = message.payloadString.trim().toLowerCase();
+      if (payload === "online") {
         updateStatusBadge("statusAlat", "online", "ALAT P10: ONLINE");
         updateSidebarStatus(true);
-      } else if (message.payloadString === "offline") {
+      } else if (payload === "offline") {
         updateStatusBadge("statusAlat", "offline", "ALAT P10: OFFLINE");
+        updateSidebarStatus(false);
       }
     }
   };
@@ -61,8 +78,14 @@ function connectMQTT() {
   // Update status menjadi menghubungkan
   const mqttEl = document.getElementById("statusMQTT");
   if (mqttEl) {
-    mqttEl.innerHTML = "BROKER: CONNECTING...";
+    mqttEl.innerHTML = "BROKER: MENGHUBUNGKAN...";
     mqttEl.className = "status-box offline";
+  }
+
+  const pesanEl = document.getElementById("pesan");
+  if (pesanEl) {
+    pesanEl.innerHTML = "🔄 Memeriksa koneksi Broker MQTT & memanggil Alat P10...";
+    setTimeout(() => { if (pesanEl) pesanEl.innerHTML = ""; }, 3000);
   }
 
   mqttClient.connect({
@@ -72,18 +95,22 @@ function connectMQTT() {
     onSuccess: function () {
       console.log("Berhasil terhubung ke Broker MQTT:", mqtt_broker);
       updateStatusBadge("statusMQTT", "online", "BROKER: ONLINE");
-      updateSidebarStatus(true);
 
-      // Subscribe ke topik status alat
+      // Subscribe ke topik status alat (utama dan alternatif)
       mqttClient.subscribe(mqtt_topic_status, {
         onSuccess: function () {
           console.log("Berhasil subscribe ke topik status:", mqtt_topic_status);
         },
       });
+      mqttClient.subscribe("sekolah/iot/p10/status");
+
+      // Kirim ping ke alat setelah tersambung
+      setTimeout(pingDevice, 400);
     },
     onFailure: function (err) {
       console.error("Gagal terhubung ke MQTT:", err.errorMessage);
-      updateStatusBadge("statusMQTT", "offline", "BROKER: DISCONNECTED");
+      updateStatusBadge("statusMQTT", "offline", "BROKER: GAGAL KONEK");
+      updateStatusBadge("statusAlat", "offline", "ALAT P10: OFFLINE");
       updateSidebarStatus(false);
       setTimeout(connectMQTT, 5000);
     },
