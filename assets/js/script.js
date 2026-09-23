@@ -11,8 +11,8 @@
 // --- 1. KONFIGURASI MQTT (Dari index2.html) ---
 const mqtt_broker = "broker.emqx.io"; // Broker EMQX publik gratis & cepat
 const mqtt_port = 8084; // Port WebSockets dengan SSL (Secure)
-const mqtt_topic = "kc-01/data"; // Topik komunikasi data panel/jam
-const mqtt_topic_status = "kc-01"; // Topik status alat online/offline
+const mqtt_topic = "sekolah/iot/p10/data"; // Topik komunikasi data & perintah ke ESP8266
+const mqtt_topic_status = "sekolah/iot/p10/status"; // Topik status online/offline ESP8266
 const client_id = "kala_clock_" + Math.random().toString(16).substr(2, 8);
 
 // Inisialisasi MQTT Client Paho
@@ -27,8 +27,8 @@ try {
 if (mqttClient) {
   mqttClient.onConnectionLost = function (responseObject) {
     console.log("MQTT Connection Lost:", responseObject.errorMessage);
-    updateStatusBadge("statusMQTT", "offline", " BROKER: OFFLINE");
-    updateStatusBadge("statusAlat", "offline", " ALAT P10: OFFLINE");
+    updateStatusBadge("statusMQTT", "offline", "🌐 BROKER: OFFLINE");
+    updateStatusBadge("statusAlat", "offline", "📟 ALAT P10: OFFLINE");
     updateSidebarStatus(false);
 
     // Coba hubungkan kembali otomatis setelah 3 detik
@@ -44,11 +44,13 @@ if (mqttClient) {
     );
 
     if (message.destinationName === mqtt_topic_status) {
-      if (message.payloadString === "online") {
-        updateStatusBadge("statusAlat", "online", " ALAT P10: ONLINE");
+      const payload = message.payloadString.trim().toLowerCase();
+      if (payload === "online") {
+        updateStatusBadge("statusAlat", "online", "📟 ALAT P10: ONLINE");
         updateSidebarStatus(true);
-      } else if (message.payloadString === "offline") {
-        updateStatusBadge("statusAlat", "offline", " ALAT P10: OFFLINE");
+      } else if (payload === "offline") {
+        updateStatusBadge("statusAlat", "offline", "📟 ALAT P10: OFFLINE");
+        updateSidebarStatus(false);
       }
     }
   };
