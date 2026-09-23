@@ -1,24 +1,21 @@
 <?php
-// ====================================================================
-// MATERI GURU DATABASE & WEB (File: koneksi.php)
-// File ini berfungsi sebagai "Jembatan" antara aplikasi web PHP
-// dengan sistem Database MySQL. Tanpa file ini, web tidak bisa menyimpan data.
-// ====================================================================
+$host = 'mysql-kalaclock-kalaclock.f.aivencloud.com';      // Contoh: mysql-xxxx.aivencloud.com
+$port = 18254;      // Port Aiven (misal: 12345 atau sesuai di Aiven)
+$user = 'avnadmin';
+$password = 'AVNS_6Tof4kG-EYfIvRdehKR';
+$dbname = 'db_iot';          // Menggunakan database db_iot yang lu buat
 
-// 1. Konfigurasi Server Database
-$host = "localhost";  // Nama server (karena menggunakan XAMPP di komputer sendiri, nilainya 'localhost')
-$user = "root";       // Username default dari XAMPP untuk mengakses MySQL
-$pass = "";           // Password default XAMPP adalah kosong (tidak ada password)
-$db   = "db_iot";     // Nama database yang kita buat di phpMyAdmin untuk project ini
+// Aiven WAJIB menggunakan koneksi SSL
+$conn = mysqli_init();
+mysqli_ssl_set($conn, NULL, NULL, NULL, NULL, NULL);
 
-// 2. Membuka Koneksi
-// Fungsi mysqli_connect() mencoba membuka jalur komunikasi dengan data di atas.
-$conn = mysqli_connect($host, $user, $pass, $db);
-
-// 3. Pengecekan Status Koneksi
-// Jika koneksi gagal (misal XAMPP MySQL belum di-start, atau nama database salah),
-// maka hentikan seluruh sistem (die) dan tampilkan pesan error.
-if (!$conn) { 
-    die("Koneksi Database Gagal: Periksa apakah MySQL di XAMPP sudah menyala dan nama database benar."); 
+// Lakukan koneksi dengan port dan SSL
+if (!mysqli_real_connect($conn, $host, $user, $password, $dbname, $port, NULL, MYSQLI_CLIENT_SSL)) {
+    header('Content-Type: application/json');
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Koneksi Aiven Gagal: ' . mysqli_connect_error()
+    ]);
+    exit();
 }
 ?>
