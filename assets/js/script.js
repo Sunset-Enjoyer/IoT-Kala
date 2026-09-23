@@ -38,8 +38,8 @@ function pingDevice() {
 if (mqttClient) {
   mqttClient.onConnectionLost = function (responseObject) {
     console.log("MQTT Connection Lost:", responseObject.errorMessage);
-    updateStatusBadge("statusMQTT", "offline", "🌐 BROKER: OFFLINE");
-    updateStatusBadge("statusAlat", "offline", "📟 ALAT P10: OFFLINE");
+    updateStatusBadge("statusMQTT", "offline", "BROKER: OFFLINE");
+    updateStatusBadge("statusAlat", "offline", "ALAT P10: OFFLINE");
     updateSidebarStatus(false);
 
     // Coba hubungkan kembali otomatis setelah 3 detik
@@ -61,10 +61,10 @@ if (mqttClient) {
     ) {
       const payload = message.payloadString.trim().toLowerCase();
       if (payload === "online") {
-        updateStatusBadge("statusAlat", "online", "📟 ALAT P10: ONLINE");
+        updateStatusBadge("statusAlat", "online", "ALAT P10: ONLINE");
         updateSidebarStatus(true);
       } else if (payload === "offline") {
-        updateStatusBadge("statusAlat", "offline", "📟 ALAT P10: OFFLINE");
+        updateStatusBadge("statusAlat", "offline", "ALAT P10: OFFLINE");
         updateSidebarStatus(false);
       }
     }
@@ -94,7 +94,7 @@ function connectMQTT() {
     keepAliveInterval: 30,
     onSuccess: function () {
       console.log("Berhasil terhubung ke Broker MQTT:", mqtt_broker);
-      updateStatusBadge("statusMQTT", "online", "🌐 BROKER: ONLINE");
+      updateStatusBadge("statusMQTT", "online", "BROKER: ONLINE");
 
       // Subscribe ke topik status alat (utama dan alternatif)
       mqttClient.subscribe(mqtt_topic_status, {
@@ -109,8 +109,8 @@ function connectMQTT() {
     },
     onFailure: function (err) {
       console.error("Gagal terhubung ke MQTT:", err.errorMessage);
-      updateStatusBadge("statusMQTT", "offline", "🌐 BROKER: GAGAL KONEK");
-      updateStatusBadge("statusAlat", "offline", "📟 ALAT P10: OFFLINE");
+      updateStatusBadge("statusMQTT", "offline", "BROKER: GAGAL KONEK");
+      updateStatusBadge("statusAlat", "offline", "ALAT P10: OFFLINE");
       updateSidebarStatus(false);
       setTimeout(connectMQTT, 5000);
     },
