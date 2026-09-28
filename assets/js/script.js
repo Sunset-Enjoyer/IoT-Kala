@@ -56,8 +56,7 @@ if (mqttClient) {
 
     // Dengarkan status dari topik utama maupun topik alternatif
     if (
-      message.destinationName === id_jam ||
-      message.destinationName === "id_jam"
+      message.destinationName === id_jam
     ) {
       const payload = message.payloadString.trim().toLowerCase();
       if (payload === "online") {
