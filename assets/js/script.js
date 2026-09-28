@@ -11,9 +11,9 @@
 // --- 1. KONFIGURASI MQTT ---
 const mqtt_broker = "broker.emqx.io"; // Broker EMQX publik gratis & cepat
 const mqtt_port = 8084; // Port WebSockets dengan SSL (Secure)
-const mqtt_topic = "KC00"; // Topik komunikasi data & perintah ke ESP8266
-const mqtt_topic_status = "KC00/status"; // Topik status online/offline ESP8266
-const client_id = "kala_clock_" + Math.random().toString(16).substr(2, 8);
+const mqtt_topic = "KalaClock"; // Topik komunikasi data & perintah ke ESP8266
+const mqtt_topic_status = "KalaClock/status"; // Topik status online/offline ESP8266
+const id_jam = "KC00";
 
 // Inisialisasi MQTT Client Paho
 let mqttClient = null;
@@ -56,8 +56,8 @@ if (mqttClient) {
 
     // Dengarkan status dari topik utama maupun topik alternatif
     if (
-      message.destinationName === mqtt_topic_status ||
-      message.destinationName === "mqtt_topic_status"
+      message.destinationName === id_jam ||
+      message.destinationName === "id_jam"
     ) {
       const payload = message.payloadString.trim().toLowerCase();
       if (payload === "online") {
@@ -85,7 +85,7 @@ function connectMQTT() {
   const pesanEl = document.getElementById("pesan");
   if (pesanEl) {
     pesanEl.innerHTML =
-      "🔄 Memeriksa koneksi Broker MQTT & memanggil Alat P10...";
+      "Memeriksa koneksi Broker MQTT & memanggil Alat P10...";
     setTimeout(() => {
       if (pesanEl) pesanEl.innerHTML = "";
     }, 3000);
@@ -105,7 +105,7 @@ function connectMQTT() {
           console.log("Berhasil subscribe ke topik status:", mqtt_topic_status);
         },
       });
-      mqttClient.subscribe("sekolah/iot/p10/status");
+      mqttClient.subscribe("KalaClock/status");
 
       // Kirim ping ke alat setelah tersambung
       setTimeout(pingDevice, 400);
