@@ -57,7 +57,7 @@ if (mqttClient) {
     // Dengarkan status dari topik utama maupun topik alternatif
     if (
       message.destinationName === mqtt_topic_status ||
-      message.destinationName === "sekolah/iot/p10/status"
+      message.destinationName === "mqtt_topic_status"
     ) {
       const payload = message.payloadString.trim().toLowerCase();
       if (payload === "online") {
