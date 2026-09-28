@@ -18,7 +18,7 @@ const id_jam = "KC00";
 // Inisialisasi MQTT Client Paho
 let mqttClient = null;
 try {
-  mqttClient = new Paho.MQTT.Client(mqtt_broker, mqtt_port, client_id);
+  mqttClient = new Paho.MQTT.Client(mqtt_broker, mqtt_port, id_jam);
 } catch (e) {
   console.warn("Paho MQTT library belum termuat:", e);
 }
