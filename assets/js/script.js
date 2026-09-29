@@ -19,9 +19,9 @@
 const mqtt_broker = "broker.emqx.io";      // Alamat broker MQTT publik EMQX
 const mqtt_port   = 8084;                  // Port WebSocket aman (WSS / SSL)
 
-let id_jam            = "";            // Default ID Jam (dapat berubah dari Login)
-let mqtt_topic_status = id_jam + "/status";
-let mqtt_topic  = id_jam;           // Topik utama komunikasi data (TETAP CONST)
+let id_jam            = "KC00";            // Default ID Jam (dapat berubah dari Login)
+const mqtt_topic_status = id_jam + "/status";
+const mqtt_topic  = id_jam;           // Topik utama komunikasi data (TETAP CONST)
 
 let mqttClient        = null;              // Instance client Paho MQTT
 let timezoneOffset    = 8;                 // Default WITA (UTC+8)
@@ -298,13 +298,13 @@ function connectMQTTClient() {
       updateStatusDot("dotBroker", true);
 
       // Subscribe ke topik status alat (dinamis sesuai id_jam)
-      mqttClient.subscribe(mqtt_topic_status, {
+      mqttClient.subscribe(mqtt_topic, {
         onSuccess: function () {
-          console.log("Berhasil subscribe ke mqtt_topic_status:", mqtt_topic_status);
+          console.log("Berhasil subscribe ke mqtt_topic_status:", mqtt_topic);
         }
       });
       // Juga subscribe ke topik cadangan status global
-      mqttClient.subscribe(mqtt_topic_status);
+      mqttClient.subscribe(mqtt_topic);
 
       // Kirim ping untuk mengecek respons unit jam
       pingJam();
